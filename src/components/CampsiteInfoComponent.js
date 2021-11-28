@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Card, CardImg, CardText, CardBody, CardTitle, Breadcrumb, BreadcrumbItem, Button, Modal, ModalBody, ModalHeader, Label } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import { Control, LocalForm, Errors } from 'react-redux-form';
+import FormFeedback from 'reactstrap/lib/FormFeedback';
 
 const maxLength = len => val => !(val) || (val.length <= len);
 const minLength = len => val => val && (val.length >= len);
@@ -12,44 +13,42 @@ class CommentForm extends Component {
         this.state = {
             isModalOpen: false,
             touched: {
-                author:false
+                author: false
             }
         };
-
         this.toggleModal = this.toggleModal.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
-
     toggleModal() {
         this.setState({
             isModalOpen: !this.state.isModalOpen
         });
     }
-
     handleSubmit(event) {
         alert('The Feedback is' + JSON.stringify(event));
         console.log('The Feedback is' + JSON.stringify(event));
         this.toggleModal();
     }
-
     validate(author) {
-
-        const errors = {
-            author: ''
-        };
-
-        if (this.state.touched.author) {
-            if (author.length < 2) {
-                errors.author = 'Must be at least 2 characters.';
-            } else if (author.length > 15) {
-                errors.author = 'Must be 15 characters or less.'
-            }
+         const errors = {
+             author: ''
+         };
+         if (this.state.touched.author) {
+             if (author.length < 2) {
+                 errors.author = 'Must be at least 2 characters.';
+             } else if (author.length > 15) {
+                 errors.author = 'Must be 15 characters or less.'
+             }
+         }
+         return errors;
         }
-        return errors;
+     handleBlur = (field) => () => {
+         this.setState({
+             touched: {...this.state.touched, [field]: true}
+         });
     }
-
     render() {
-        
+        const errors = this.validate(this.state.author);
         return (
             <React.Fragment>
                 <div>
@@ -73,15 +72,20 @@ class CommentForm extends Component {
                             </div>
                             <div className="form-group">
                                 <Label htmlFor="author">Your Name</Label>
-                                <Control.text className="form-control" model=".author" id="author" name="author" placeholder="Your Name" innerRef={input => this.author = input} validators={{maxLength: maxLength(15), minLength: minLength(2)}} />
+                                <Control.text className="form-control" model=".author" id="author" name="author" placeholder="Your Name" innerRef={input => this.author = input}
+                                    validators={{
+                                        maxLength: maxLength(15),
+                                        minLength: minLength(2)
+                                    }}
+                                />
                                 <Errors 
                                     className="text-danger"
                                     model=".author"
                                     show="touched"
                                     component="div"
                                     messages={{
-                                        minLength: "Must be at least 2 characters.",
-                                        maxLength: "Must be 15 characters or less."
+                                        minLength: "Must be at least 2 character",
+                                        maxLength: "Must be 15 characters or less"
                                     }}
                                 />
                             </div>
@@ -97,7 +101,6 @@ class CommentForm extends Component {
         );
     }
 }
-
 function RenderCampsite({campsite}) {
     return (
         <div className="col-md-5 m-1">
@@ -110,7 +113,6 @@ function RenderCampsite({campsite}) {
         </div>
     );
 }
-
 function RenderComments({comments}) {
     if (comments) {
         return (
@@ -131,7 +133,6 @@ function RenderComments({comments}) {
     }
     return <div />
 }
-
 function CampsiteInfo(props) {
     if (props.campsite) {
         return (
@@ -155,5 +156,4 @@ function CampsiteInfo(props) {
     }
     return <div />;
 }
-
 export default CampsiteInfo;
