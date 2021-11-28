@@ -1,6 +1,102 @@
-import React from 'react';
-import { Card, CardImg, CardText, CardBody, CardTitle, Breadcrumb, BreadcrumbItem } from 'reactstrap';
+import React, { Component } from 'react';
+import { Card, CardImg, CardText, CardBody, CardTitle, Breadcrumb, BreadcrumbItem, Button, Modal, ModalBody, ModalHeader, Label } from 'reactstrap';
 import { Link } from 'react-router-dom';
+import { Control, LocalForm, Errors } from 'react-redux-form';
+
+const maxLength = len => val => !(val) || (val.length <= len);
+const minLength = len => val => val && (val.length >= len);
+
+class CommentForm extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isModalOpen: false,
+            touched: {
+                author:false
+            }
+        };
+
+        this.toggleModal = this.toggleModal.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    toggleModal() {
+        this.setState({
+            isModalOpen: !this.state.isModalOpen
+        });
+    }
+
+    handleSubmit(event) {
+        alert('The Feedback is' + JSON.stringify(event));
+        console.log('The Feedback is' + JSON.stringify(event));
+        this.toggleModal();
+    }
+
+    validate(author) {
+
+        const errors = {
+            author: ''
+        };
+
+        if (this.state.touched.author) {
+            if (author.length < 2) {
+                errors.author = 'Must be at least 2 characters.';
+            } else if (author.length > 15) {
+                errors.author = 'Must be 15 characters or less.'
+            }
+        }
+        return errors;
+    }
+
+    render() {
+        
+        return (
+            <React.Fragment>
+                <div>
+                    <Button onClick={this.toggleModal} outline>
+                        <i className="fa fa-pencil fa-lg"></i>Submit Comment
+                    </Button>
+                </div>
+                <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
+                    <ModalHeader toggle={this.toggleModal}>Submit Comment</ModalHeader>
+                    <ModalBody>
+                        <LocalForm onSubmit={event => this.handleSubmit(event)}>
+                            <div className="form-group">
+                                <Label htmlFor="rating">Rating</Label>
+                                <Control.select className="form-control" model=".rating" id="rating" name="rating" innerRef={input => this.rating = input}>
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option>5</option>
+                                </Control.select>
+                            </div>
+                            <div className="form-group">
+                                <Label htmlFor="author">Your Name</Label>
+                                <Control.text className="form-control" model=".author" id="author" name="author" placeholder="Your Name" innerRef={input => this.author = input} validators={{maxLength: maxLength(15), minLength: minLength(2)}} />
+                                <Errors 
+                                    className="text-danger"
+                                    model=".author"
+                                    show="touched"
+                                    component="div"
+                                    messages={{
+                                        minLength: "Must be at least 2 characters.",
+                                        maxLength: "Must be 15 characters or less."
+                                    }}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <Label htmlFor="text">Comment</Label>
+                                <Control.textarea className="form-control" model=".text" id="text" name="text" rows="6" innerRef={input => this.text = input} />
+                            </div>
+                            <Button type="submit" value="submit" color="primary">Submit</Button>
+                        </LocalForm>
+                    </ModalBody>
+                </Modal>
+            </React.Fragment>
+        );
+    }
+}
 
 function RenderCampsite({campsite}) {
     return (
@@ -29,6 +125,7 @@ function RenderComments({comments}) {
                         </div>
                     );
                 })}
+                <CommentForm />
             </div>
         );
     }
